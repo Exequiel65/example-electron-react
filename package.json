@@ -1,6 +1,6 @@
 {
   "name": "example-electron-app-react",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Electron react example",
   "main": "dist/electron/main.js",
   "author": "marcos97britos@gmail.com",
