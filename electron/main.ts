@@ -14,9 +14,7 @@ function createWindow() {
     width: 1200,
     height: 800,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      preload: path.join(__dirname, 'preload.js') // Necesario para comunicación IPC segura
+      preload: path.join(__dirname, 'preload.js'),
     },
   });
 
@@ -28,48 +26,70 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
   }
 
-  // Configurar manejadores de eventos de la ventana
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
 
-  // Verificar actualizaciones después de que la ventana esté lista
-  mainWindow.webContents.on('did-finish-load', () => {
-    autoUpdater.checkForUpdatesAndNotify();
-  });
+  return mainWindow;
 }
 
-// Configurar autoUpdater
+
 function setupAutoUpdater() {
-  autoUpdater.autoDownload = false; // Opcional: control manual de descarga
 
-  // Eventos de actualización
-  autoUpdater.on('update-available', () => {
-    mainWindow?.webContents.send('update_available');
+  autoUpdater.setFeedURL({
+    provider: 'github',
+    owner: 'Exequiel65',
+    repo: 'example-electron-react '
   });
 
-  autoUpdater.on('update-downloaded', () => {
-    mainWindow?.webContents.send('update_downloaded');
-  });
+  autoUpdater.autoDownload = false;
+  autoUpdater.autoInstallOnAppQuit = true;
 
-  autoUpdater.on('error', (error) => {
-    mainWindow?.webContents.send('update_error', error.message);
+  ipcMain.on('check_for_updates', () => {
+    autoUpdater.checkForUpdates()
+      .then(result => {
+        console.log('Update check result:', result?.updateInfo?.version);
+      })
+      .catch(err => {
+        console.error('Update check error:', err);
+        mainWindow?.webContents.send('update_error', err.message);
+      });
+  });
+  
+  autoUpdater.on('update-available', (info) => {
+    mainWindow?.webContents.send('update_available', info.version);
+  });
+  
+  autoUpdater.on('update-downloaded', (info) => {
+    mainWindow?.webContents.send('update_downloaded', info.version);
+  });
+  
+  autoUpdater.on('download-progress', (progressObj) => {
+    mainWindow?.webContents.send('download_progress', {
+      percent: progressObj.percent
+    });
   });
 }
 
-// Manejar comandos IPC desde el renderer
-ipcMain.on('restart_app', () => {
-  autoUpdater.quitAndInstall();
-});
+function setupIPC() {
+  ipcMain.on('restart_app', () => {
+    autoUpdater.quitAndInstall();
+  });
 
-ipcMain.on('download_update', () => {
-  autoUpdater.downloadUpdate();
-});
+  ipcMain.on('download_update', () => {
+    autoUpdater.downloadUpdate();
+  });
+}
 
-// Iniciar la aplicación
 app.whenReady().then(() => {
-  createWindow();
+  const window = createWindow();
   setupAutoUpdater();
+  setupIPC();
+
+  // Verificar actualizaciones después de un breve retraso
+  setTimeout(() => {
+    autoUpdater.checkForUpdates();
+  }, 5000);
 });
 
 app.on('window-all-closed', () => {

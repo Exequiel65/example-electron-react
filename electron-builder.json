@@ -13,9 +13,18 @@
   "files": [
     "dist/build/image/**/*",
     "dist/electron/**/*",
-    "dist/renderer/**/*"
+    "dist/renderer/**/*",
+    {
+      "from": "electron/preload.js",
+      "to": "electron/preload.js"
+    }
   ],
-  "extraResources": [],
+  "extraResources": [
+    {
+      "from": "electron/preload.js",
+      "to": "electron/preload.js"
+    }
+  ],
   "asar": true,
   "win": {
     "target": "nsis",

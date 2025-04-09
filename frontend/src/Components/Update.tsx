@@ -1,50 +1,89 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
 
 // Extend the Window interface to include electronAPI
 declare global {
   interface Window {
-    electronAPI: {
-      on: (channel: string, listener: (...args: any[]) => void) => void;
-      send: (channel: string, ...args: any[]) => void;
+    electronAPI?: {
+      checkForUpdates: () => void;
+      onUpdateAvailable: (callback: (version: string) => void) => void;
+      onUpdateDownloaded: (callback: (version: string) => void) => void;
+      onDownloadProgress: (callback: (percent: number) => void) => void;
+      downloadUpdate: () => void;
+      restartApp: () => void;
+      removeAllListeners: () => void;
     };
   }
 }
 
-
 export default function Update() {
-    const [updateState, setUpdateState] = useState('');
+  const [updateState, setUpdateState] = useState<'available' | 'downloaded' | ''>('');
+  const [status, setStatus] = useState('Verificando actualizaciones...');
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    window.electronAPI.on('update_available', () => {
+    if (!window.electronAPI) {
+      setStatus('No se detectó el entorno Electron');
+      return;
+    }
+
+    // Verificar actualizaciones al montar
+    window.electronAPI.checkForUpdates();
+
+    const handleUpdateAvailable = (version: string) => {
+      console.log('Update available:', version);
       setUpdateState('available');
-    });
-    
-    window.electronAPI.on('update_downloaded', () => {
+      setStatus(`Actualización disponible: v${version}`);
+    };
+
+    const handleUpdateDownloaded = (version: string) => {
+      console.log('Update downloaded:', version);
       setUpdateState('downloaded');
-    });
+      setStatus(`Actualización lista: v${version}`);
+    };
+
+    const handleProgress = (percent: number) => {
+      setProgress(percent);
+    };
+
+    // Configurar listeners
+    window.electronAPI.onUpdateAvailable(handleUpdateAvailable);
+    window.electronAPI.onUpdateDownloaded(handleUpdateDownloaded);
+    window.electronAPI.onDownloadProgress(handleProgress);
+
+    return () => {
+      window.electronAPI?.removeAllListeners();
+    };
   }, []);
 
   const handleDownload = () => {
-    window.electronAPI.send('download_update');
+    setStatus('Descargando actualización...');
+    window.electronAPI?.downloadUpdate();
   };
 
   const handleRestart = () => {
-    window.electronAPI.send('restart_app');
+    window.electronAPI?.restartApp();
   };
 
   return (
     <div className="update-notification">
-      {updateState === 'available' && (
-        <div>
-          <p>Nueva actualización disponible</p>
-          <button onClick={handleDownload}>Descargar</button>
+      <div className="update-status">{status}</div>
+      
+      {progress > 0 && progress < 100 && (
+        <div className="progress-bar">
+          <div style={{ width: `${progress}%` }}></div>
         </div>
       )}
+
+      {updateState === 'available' && (
+        <button onClick={handleDownload}>
+          Descargar Actualización ({progress}%)
+        </button>
+      )}
+
       {updateState === 'downloaded' && (
-        <div>
-          <p>Actualización lista para instalar</p>
-          <button onClick={handleRestart}>Reiniciar e instalar</button>
-        </div>
+        <button onClick={handleRestart}>
+          Reiniciar e Instalar
+        </button>
       )}
     </div>
   );
