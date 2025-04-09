@@ -1,6 +1,11 @@
 {
   "appId": "com.example.electronnestreact",
   "productName": "ElectronNestReact",
+  "publish": {
+    "provider": "github",
+    "owner": "Exequiel65",
+    "repo": "electron-nest-react"
+  },
   "directories": {
     "output": "dist",
     "buildResources": "build"
