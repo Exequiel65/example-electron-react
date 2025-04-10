@@ -1,6 +1,12 @@
 {
   "appId": "com.example.electronnestreact",
   "productName": "ElectronNestReact",
+  "artifactName": "${productName}-Setup-${version}.${ext}",
+  "publish": {
+    "provider": "github",
+    "owner": "Exequiel65",
+    "repo": "example-electron-react"
+  },
   "directories": {
     "output": "dist",
     "buildResources": "build"
@@ -8,15 +14,26 @@
   "files": [
     "dist/build/image/**/*",
     "dist/electron/**/*",
-    "dist/renderer/**/*"
+    "dist/renderer/**/*",
+    {
+      "from": "electron/preload.js",
+      "to": "electron/preload.js"
+    }
   ],
-  "extraResources": [],
+  "extraResources": [
+    {
+      "from": "electron/preload.js",
+      "to": "electron/preload.js"
+    }
+  ],
   "asar": true,
   "win": {
     "target": "nsis",
-    "icon": "build/image/logo.ico"
+    "icon": "build/image/logo.ico",
+    "artifactName": "${productName}-Setup-${version}.${ext}"
   },
   "nsis": {
+    "artifactName": "${productName}-Setup-${version}.${ext}",
     "oneClick": false,
     "perMachine": false,
     "allowElevation": true,

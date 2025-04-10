@@ -8,11 +8,12 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "concurrently -k \"npm run dev:frontend\" \"npm run dev:electron\"",
     "dev:frontend": "cd frontend && npm run dev",
-    "dev:electron": "wait-on tcp:5173 && cross-env NODE_ENV=development electron .",
-    "build": "npm run build:frontend && npm run build:electron",
+    "dev:electron": "tsc && npm run copy:preload && wait-on tcp:5173 && cross-env NODE_ENV=development electron .",
+    "build": "npm run build:frontend && npm run build:electron && npm run copy:preload",
     "build:frontend": "cd frontend && npm run build",
     "build:electron": "tsc && electron-builder",
-    "start": "electron ."
+    "start": "electron .",
+    "copy:preload": "cp electron/preload.js dist/electron/preload.js"
   },
   "keywords": [],
   "license": "ISC",
@@ -22,5 +23,9 @@
     "electron": "^35.1.4",
     "electron-builder": "^26.0.12",
     "wait-on": "^8.0.3"
+  },
+  "dependencies": {
+    "electron-log": "^5.3.3",
+    "electron-updater": "^6.6.2"
   }
 }
