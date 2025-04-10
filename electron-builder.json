@@ -1,6 +1,7 @@
 {
   "appId": "com.example.electronnestreact",
   "productName": "ElectronNestReact",
+  "artifactName": "${productName}-Setup-${version}.${ext}",
   "publish": {
     "provider": "github",
     "owner": "Exequiel65",
@@ -28,9 +29,11 @@
   "asar": true,
   "win": {
     "target": "nsis",
-    "icon": "build/image/logo.ico"
+    "icon": "build/image/logo.ico",
+    "artifactName": "${productName}-Setup-${version}.${ext}"
   },
   "nsis": {
+    "artifactName": "${productName}-Setup-${version}.${ext}",
     "oneClick": false,
     "perMachine": false,
     "allowElevation": true,

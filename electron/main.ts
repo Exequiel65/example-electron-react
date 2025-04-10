@@ -39,9 +39,10 @@ function setupAutoUpdater() {
   autoUpdater.setFeedURL({
     provider: 'github',
     owner: 'Exequiel65',
-    repo: 'example-electron-react '
+    repo: 'example-electron-react',
+    releaseType: 'release',
+    vPrefixedTagName: true,
   });
-
   autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = true;
 

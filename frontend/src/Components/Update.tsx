@@ -85,6 +85,9 @@ export default function Update() {
           Reiniciar e Instalar
         </button>
       )}
+      <button onClick={() => window.electronAPI?.checkForUpdates()}>
+        Verificar Actualizaciones Manualmente
+      </button>
     </div>
   );
 }
